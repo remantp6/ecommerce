@@ -15,7 +15,7 @@ interface Product {
   category: string;
   sub_category: string;
   image: string;
-  price: string;
+  price: number;
   stock: number;
 }
 interface ProductCardProps {
@@ -26,12 +26,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
 
   const handleViewDetails = (id: number) => {
+    console.log("View details for product ID:", id);
     router.push(`/products/${id}`);
   };
   return (
     <Card className="border-1 border-gray-200 pt-0 pb-2 md:pb-4  shadow-none">
       <Image
-        src={product.image}
+        src={"https://pics.craiyon.com/2023-12-04/RkicXp6zSCCjyyXKyqg7Uw.webp"}
         alt={product.name || "Product Image"}
         width={300}
         height={200}
