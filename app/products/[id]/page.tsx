@@ -6,28 +6,51 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { products } from "../page";
 import React from "react";
 import { useParams } from "next/navigation";
+import { useProductDetails } from "@/hooks/product-hook/useProductDetails";
+import { Product } from "@/types/product";
+
+interface ProductWithExtras extends Product {
+  sub_category: string;
+  long_desc: string;
+  name: string; // for display title fallback
+}
+const MOCK_FIELDS = {
+  sub_category: "General",
+  long_desc: "This is a mocked long description for the product.",
+  image: "https://via.placeholder.com/600",
+  name: "Mock Product Name",
+};
 
 export default function ProductPage() {
   const { id } = useParams();
-  const product = products.find((p) => p.id.toString() === id);
+  const {
+    data: productData,
+    isLoading,
+    isError,
+    error,
+  } = useProductDetails(id as string);
 
-  if (!product) {
+  if (isLoading) return <p>Loading products...</p>;
+  if (isError) return <p>Error: {error?.message || "Something went wrong"}</p>;
+  if (!productData)
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-destructive">Product not found</p>
-            <Button asChild className="mt-4">
-              <Link href="/products">Back to Products</Link>
-            </Button>
-          </div>
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-destructive">Product not found</p>
+          <Button asChild className="mt-4">
+            <Link href="/products">Back to Products</Link>
+          </Button>
         </div>
       </div>
     );
-  }
+
+  // Spread API data and create new mock fields
+  const product: ProductWithExtras = {
+    ...productData.data,
+    ...MOCK_FIELDS,
+  };
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -42,8 +65,10 @@ export default function ProductPage() {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src={product.image}
-              alt={product.name || "Product"}
+              src={
+                "https://pics.craiyon.com/2023-12-04/RkicXp6zSCCjyyXKyqg7Uw.webp"
+              }
+              alt={product.name || product.title}
               width={600}
               height={600}
               className="object-cover w-full h-full"
@@ -56,14 +81,16 @@ export default function ProductPage() {
             <Badge variant="secondary" className="mb-2">
               {product.category}
             </Badge>
-            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+            <h1 className="text-3xl font-bold mb-4">
+              {product.name || product.title}
+            </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              {product.long_desc}
+              {product.long_desc || product.description}
             </p>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-4xl font-bold">{product.price}</span>
+            <span className="text-4xl font-bold">${product.price}</span>
             <Badge
               variant={product.stock > 0 ? "default" : "destructive"}
               className="text-sm"
