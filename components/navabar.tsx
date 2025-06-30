@@ -21,11 +21,13 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useUserStore } from "@/store/userStore";
+import { useLogout } from "@/hooks/auth-hook/useLogout";
 
 const Navbar = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { username, role } = useUserStore();
+  const { mutate: logout } = useLogout();
   const isAuthenticated = !!username;
   const totalItems = 0; // Replace with actual cart item count logic
 
@@ -33,6 +35,10 @@ const Navbar = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleLogOut = () => {
+    logout();
+  };
 
   return (
     <nav className="border-b">
@@ -113,7 +119,10 @@ const Navbar = () => {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleLogOut}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
                     </DropdownMenuItem>
