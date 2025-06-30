@@ -20,18 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useUserStore } from "@/store/userStore";
 
-export const user = {
-  username: "JohnDoe",
-  // role: "USER",
-  role: "ADMIN",
-  email: "xyz@gmail.com",
-};
 const Navbar = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isAuthenticated = true; // Replace with actual authentication logic
-  const totalItems = 1; // Replace with actual cart item count logic
+  const { username, role } = useUserStore();
+  const isAuthenticated = !!username;
+  const totalItems = 0; // Replace with actual cart item count logic
 
   // Ensure the theme is set only after the component has mounted
   useEffect(() => {
@@ -102,13 +98,13 @@ const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <div className="px-2 py-1.5 text-sm font-medium">
-                      {user?.username}
+                      {username}
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
-                    {user?.role === "ADMIN" && (
+                    {role === "ADMIN" && (
                       <DropdownMenuItem asChild className="cursor-pointer">
                         <Link href="/admin">
                           <Settings className="mr-2 h-4 w-4" />
@@ -126,25 +122,16 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link href="/login">
-                  <Button variant="ghost">Login</Button>
+                <Link href="/auth/login">
+                  <Button variant="ghost" className="cursor-pointer">
+                    Login
+                  </Button>
                 </Link>
-                <Link href="/register">
-                  <Button>Register</Button>
+                <Link href="/auth/register">
+                  <Button className="cursor-pointer">Register</Button>
                 </Link>
               </div>
             )}
-
-            {/* <div className="flex items-center space-x-2">
-              <Link href="/auth/login">
-                <Button variant="ghost" className="cursor-pointer">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button className="cursor-pointer">Register</Button>
-              </Link>
-            </div> */}
           </div>
         </div>
       </div>

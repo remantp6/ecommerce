@@ -4,7 +4,7 @@ import { useState } from "react";
 import { User, Mail, Calendar, Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { user } from "@/components/navabar";
+import { useUserStore } from "@/store/userStore";
 
 // Mock order data - in a real app, this would come from an API
 const mockOrders = [
@@ -36,6 +36,7 @@ const mockOrders = [
 
 export default function ProfilePage() {
   const [orders] = useState(mockOrders);
+  const { username, role, email } = useUserStore();
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -70,15 +71,15 @@ export default function ProfilePage() {
                   <User className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{user?.username}</h3>
-                  <p className="text-muted-foreground">{user?.role}</p>
+                  <h3 className="font-semibold text-lg">{username}</h3>
+                  <p className="text-muted-foreground">{role}</p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{user?.email}</span>
+                  <span>{email}</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
