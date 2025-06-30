@@ -127,7 +127,7 @@ export default function RegisterPage() {
                 onChange={(e) => setIsAdmin(e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
-              <Label htmlFor="isAdmin">Register as Admin</Label>
+              <Label htmlFor="isAdmin">Is Admin?</Label>
             </div>
 
             <Button
