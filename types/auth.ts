@@ -29,3 +29,7 @@ export type LoginPayloadTypes = {
   password: string;
   username: string;
 };
+
+export type LogoutResponse = {
+  message?: string;
+};
