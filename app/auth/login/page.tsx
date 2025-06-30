@@ -17,6 +17,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLogin } from "@/hooks/auth-hook/useLogin";
+import { toast } from "sonner";
+import { useUserStore } from "@/store/userStore";
+import { useTokenStore } from "@/store/tokenStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,12 +33,28 @@ export default function LoginPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { mutate: loginUser, isPending } = useLogin();
+  const { setUser } = useUserStore();
+  const { setTokens } = useTokenStore();
 
   const onSubmit = async (data: LoginSchemaType) => {
-    setLoading(true);
-    console.log("Form submitted:", data);
-    router.push("/");
+    loginUser(data, {
+      onSuccess: (res) => {
+        const { accessToken, refreshToken, user } = res.data;
+
+        // Save tokens
+        setTokens(accessToken, refreshToken);
+
+        // Save user info
+        setUser({
+          username: user.username,
+          role: user.role,
+          email: user.email,
+        });
+        toast.success(res.message || "Registration successful!");
+        router.replace("/");
+      },
+    });
   };
 
   return (
@@ -95,9 +115,9 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full cursor-pointer"
-              disabled={loading}
+              disabled={isPending}
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 

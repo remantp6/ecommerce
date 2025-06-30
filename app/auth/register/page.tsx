@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRegister } from "@/hooks/auth-hook/useRegister";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,13 +34,23 @@ export default function RegisterPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { mutate: registerUser, isPending } = useRegister();
 
   const onSubmit = async (data: RegisterSchemaType) => {
-    setLoading(true);
-    console.log("Form submitted:", data);
-    router.push("/auth/login");
+    const role: "ADMIN" | "USER" = isAdmin ? "ADMIN" : "USER";
+    const payload = {
+      ...data,
+      role,
+    };
+
+    //console.log("Form data:", payload);
+    registerUser(payload, {
+      onSuccess: (res) => {
+        toast.success(res.message || "Registration successful!");
+        router.push("/auth/login");
+      },
+    });
   };
 
   return (
@@ -107,42 +119,23 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  {...register("confirmPassword")}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isAdmin"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label htmlFor="isAdmin">Register as Admin</Label>
             </div>
 
             <Button
               type="submit"
               className="w-full cursor-pointer"
-              disabled={loading}
+              disabled={isPending}
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {isPending ? "Creating account..." : "Create Account"}
             </Button>
           </form>
 
