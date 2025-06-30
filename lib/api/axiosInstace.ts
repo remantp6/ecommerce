@@ -1,10 +1,6 @@
 import axios, { AxiosError } from "axios";
 import ERROR_MESSAGES from "@/config/customError";
-import {
-  clearSessionTokens,
-  getSessionTokens,
-  setSessionTokens,
-} from "./tokenService";
+import { useTokenStore } from "@/store/tokenStore";
 
 // Define the type for failed requests
 type FailedRequest = {
@@ -44,7 +40,7 @@ const processQueue = (
 
 // Add access token to all requests
 axiosInstance.interceptors.request.use((config) => {
-  const { accessToken } = getSessionTokens();
+  const { accessToken } = useTokenStore?.getState();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -65,11 +61,10 @@ axiosInstance.interceptors.response.use(
       if (status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        const { refreshToken } = getSessionTokens();
+        const { refreshToken } = useTokenStore?.getState();
         if (!refreshToken) {
-          clearSessionTokens();
+          sessionStorage.clear();
           window.location.href = "/auth/login";
-          // return Promise.reject(new Error("No refresh token available"));
         }
 
         // If we are already refreshing the token, wait for it to finish
@@ -94,7 +89,7 @@ axiosInstance.interceptors.response.use(
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
             response.data;
 
-          setSessionTokens(newAccessToken, newRefreshToken);
+          useTokenStore?.getState()?.setTokens(newAccessToken, newRefreshToken);
           axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
           processQueue(null, newAccessToken);
           return axiosInstance(originalRequest);
@@ -104,7 +99,7 @@ axiosInstance.interceptors.response.use(
           } else {
             processQueue(null, null);
           }
-          clearSessionTokens();
+          sessionStorage.clear();
           window.location.href = "/auth/login";
           return Promise.reject(err);
         } finally {
@@ -123,7 +118,9 @@ axiosInstance.interceptors.response.use(
       message = ERROR_MESSAGES.NETWORK_ERROR;
     }
 
-    return Promise.reject(new Error(message));
+    //console.log("Error in Axios response interceptor11:", message);
+
+    throw new Error(message);
   }
 );
 

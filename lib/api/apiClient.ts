@@ -9,6 +9,7 @@ export const apiClient = {
 
   post: async <R, T>(endpoint: string, payload: R): Promise<T> => {
     const response = await axiosInstance.post<T>(endpoint, payload);
+    // console.log("Response from POST:", response.data);
     return response.data;
   },
 
