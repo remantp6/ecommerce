@@ -48,3 +48,23 @@ This project is a simple eCommerce frontend application that allows authenticate
    ```bash
    git clone https://github.com/remantp6/ecommerce.git
    cd ecommerce
+
+2. Install dependency:
+   npm install
+
+3. Run application:
+   npm run dev
+
+### Project Structure
+```
+├── app/
+├── components/
+├── config/
+├── hooks/
+├── libs/
+│ ├── api/
+│ ├── validations/
+│ └── utils.ts
+├── provider/
+├── store/
+├── types/
