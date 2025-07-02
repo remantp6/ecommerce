@@ -14,8 +14,11 @@ This project is a simple eCommerce frontend application that allows authenticate
 
 ## Additional Features
 
-  - **Protected Routes**  
+- **Protected Routes**  
   Certain pages are accessible only to authenticated users.
+
+- **Page not found**  
+  Displays a custom 404 page for undefined or invalid routes.
 
 - **Centralized Error Handling**  
   All API-related errors are handled in one place using Axios interceptors.
