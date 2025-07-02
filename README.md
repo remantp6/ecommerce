@@ -46,5 +46,5 @@ This project is a simple eCommerce frontend application that allows authenticate
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/simple-ecommerce-app.git
-   cd simple-ecommerce-app
+   git clone https://github.com/remantp6/ecommerce.git
+   cd ecommerce
