@@ -44,6 +44,7 @@ This project is a simple eCommerce frontend application that allows authenticate
 - **UI Library:** shadcn/ui
 - **Styling:** Tailwind CSS
 
+
 ## Installation
 
 1. Clone the repository:
@@ -52,10 +53,24 @@ This project is a simple eCommerce frontend application that allows authenticate
    git clone https://github.com/remantp6/ecommerce.git
    cd ecommerce
 
-2. Install dependency:
+2. Environment Setup
+
+   Create a `.env.local` file in the root directory and add the following:
+
+   ```env
+   NEXT_PUBLIC_API_BASE_URL=https://api.freeapi.app/api/v1
+   ```
+
+3. Install dependency:
    npm install
 
-3. Run application:
+4. Build application:
+   npm run build
+
+5. Start the application:
+   npm start
+
+6. Run the application in development mode:
    npm run dev
 
 ### Project Structure
