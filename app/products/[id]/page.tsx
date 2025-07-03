@@ -6,35 +6,50 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useProductDetails } from "@/hooks/product-hook/useProductDetails";
-import { Product } from "@/types/product";
-
-interface ProductWithExtras extends Product {
-  sub_category: string;
-  long_desc: string;
-  name: string; // for display title fallback
-}
-const MOCK_FIELDS = {
-  sub_category: "General",
-  long_desc: "This is a mocked long description for the product.",
-  image: "https://via.placeholder.com/600",
-  name: "Mock Product Name",
-};
+import { useCart } from "@/hooks/cart-hook/useCart";
+import ProductDetailsSkeleton from "@/components/skeletons/ProductDetailsSkeleton";
+import { useUserStore } from "@/store/userStore";
+import { toast } from "sonner";
 
 export default function ProductPage() {
+  const router = useRouter();
   const { id } = useParams();
+  const { username } = useUserStore();
+  const isAuthenticated = !!username;
   const {
     data: productData,
     isLoading,
     isError,
     error,
+    refetch,
   } = useProductDetails(id as string);
 
-  if (isLoading) return <p>Loading products...</p>;
-  if (isError) return <p>Error: {error?.message || "Something went wrong"}</p>;
-  if (!productData)
+  const { cart, addCartItem, incrementCartItem, isAdding, isIncrementing } =
+    useCart();
+
+  if (isLoading) {
+    return <ProductDetailsSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-[80%] mx-auto mt-[30px] px-4 py-8 text-center border-[1px] border-destructive rounded-lg">
+        <p className="text-destructive">
+          Error loading product: {error?.message || "Unknown error"}
+        </p>
+        <div className="mt-4 space-x-4">
+          <Button onClick={() => refetch()}>Retry</Button>
+          <Button asChild variant="outline">
+            <Link href="/products">Back to Products</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!productData?.data) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 text-center">
@@ -45,11 +60,28 @@ export default function ProductPage() {
         </div>
       </div>
     );
+  }
 
-  // Spread API data and create new mock fields
-  const product: ProductWithExtras = {
-    ...productData.data,
-    ...MOCK_FIELDS,
+  const product = productData.data;
+
+  const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart");
+      return;
+    }
+    const cartItem = cart?.items.find(
+      (item) => item.product._id === product._id
+    );
+
+    if (cartItem) {
+      // If item exists, increment quantity
+      incrementCartItem(product._id, cartItem.quantity);
+    } else {
+      // If item doesn't exist, add new item
+      addCartItem(product._id);
+    }
+
+    router.push("/cart");
   };
 
   return (
@@ -65,13 +97,12 @@ export default function ProductPage() {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src={
-                "https://pics.craiyon.com/2023-12-04/RkicXp6zSCCjyyXKyqg7Uw.webp"
-              }
-              alt={product.name || product.title}
+              src={product.mainImage.url}
+              alt={product.name}
               width={600}
               height={600}
               className="object-cover w-full h-full"
+              priority
             />
           </div>
         </div>
@@ -81,11 +112,9 @@ export default function ProductPage() {
             <Badge variant="secondary" className="mb-2">
               {product.category}
             </Badge>
-            <h1 className="text-3xl font-bold mb-4">
-              {product.name || product.title}
-            </h1>
+            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              {product.long_desc || product.description}
+              {product.description}
             </p>
           </div>
 
@@ -100,16 +129,17 @@ export default function ProductPage() {
           </div>
 
           <Button
-            disabled={product.stock === 0}
+            disabled={product.stock === 0 || isAdding || isIncrementing}
             size="lg"
             className="w-full cursor-pointer"
+            onClick={handleAddToCart}
           >
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Add to Cart
+            {isAdding || isIncrementing ? "Adding..." : "Add to Cart"}
           </Button>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="px-6">
               <h3 className="font-semibold mb-2">Product Details</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -117,12 +147,12 @@ export default function ProductPage() {
                   <span>{product.category}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sub Category:</span>
-                  <span>{product.sub_category}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-muted-foreground">Stock:</span>
                   <span>{product.stock} units</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Product ID:</span>
+                  <span className="font-mono text-xs">{product._id}</span>
                 </div>
               </div>
             </CardContent>

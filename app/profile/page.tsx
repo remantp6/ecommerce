@@ -1,43 +1,43 @@
 "use client";
 
-import { useState } from "react";
 import { User, Mail, Calendar, Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useUserStore } from "@/store/userStore";
-
-// Mock order data - in a real app, this would come from an API
-const mockOrders = [
-  {
-    id: "ORD-001",
-    date: "2024-01-15",
-    status: "Delivered",
-    total: 129.99,
-    items: [
-      { name: "Wireless Headphones", quantity: 1, price: 99.99 },
-      { name: "Phone Case", quantity: 1, price: 29.99 },
-    ],
-  },
-  {
-    id: "ORD-002",
-    date: "2024-01-10",
-    status: "Shipped",
-    total: 79.99,
-    items: [{ name: "Bluetooth Speaker", quantity: 1, price: 79.99 }],
-  },
-  {
-    id: "ORD-003",
-    date: "2024-01-05",
-    status: "Processing",
-    total: 199.99,
-    items: [{ name: "Smart Watch", quantity: 1, price: 199.99 }],
-  },
-];
+import { useOrderHistory } from "@/hooks/order-history-hook/useOrderHistory";
+import { Button } from "@/components/ui/button";
+import ProfileSkeleton from "@/components/skeletons/ProfileSkeleton";
 
 export default function ProfilePage() {
-  const [orders] = useState(mockOrders);
   const { username, role, email } = useUserStore();
+  const {
+    data: orderHistoryData,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchOrderHistory,
+  } = useOrderHistory();
 
+  // Loading state
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="max-w-[80%] mx-auto mt-[30px] px-4 py-8 text-center border-[1px] border-destructive rounded-lg">
+        <p className="text-destructive">
+          Error loading order history: {error?.message || "Unknown error"}
+        </p>
+        <Button onClick={() => refetchOrderHistory()} className="mt-4">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // Helper functions
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered":
@@ -46,9 +46,18 @@ export default function ProfilePage() {
         return "secondary";
       case "processing":
         return "outline";
+      case "cancelled":
+        return "destructive";
       default:
         return "outline";
     }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
   };
 
   return (
@@ -100,49 +109,63 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {orders.map((order) => (
-                  <Card
-                    key={order.id}
-                    className="border-l-4 border-l-primary/20"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold">{order.id}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(order.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
-                          <p className="font-semibold mt-1">
-                            ${order.total.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        {order.items.map((item, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between text-sm"
-                          >
-                            <span>
-                              {item.name} × {item.quantity}
-                            </span>
-                            <span>${item.price.toFixed(2)}</span>
+              {orderHistoryData?.data &&
+              orderHistoryData?.data?.orders.length > 0 ? (
+                <div className="space-y-4">
+                  {orderHistoryData?.data?.orders?.map((order) => (
+                    <Card
+                      key={order._id}
+                      className="border-l-4 border-l-primary/20"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold">
+                              ORD-{order._id.slice(-4).toUpperCase()}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(order.createdAt).toLocaleDateString()}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                          <div className="text-right">
+                            <Badge variant={getStatusColor(order.status)}>
+                              {order.status}
+                            </Badge>
+                            <p className="font-semibold mt-1">
+                              {formatPrice(order.orderPrice)}
+                            </p>
+                          </div>
+                        </div>
 
-              {orders.length === 0 && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>Items</span>
+                            <span>{order.totalOrderItems}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Payment Method</span>
+                            <span>{order.paymentProvider}</span>
+                          </div>
+                          {order.address && (
+                            <div className="text-sm">
+                              <p className="font-medium mt-2">
+                                Shipping Address:
+                              </p>
+                              <p>{order.address.addressLine1}</p>
+                              <p>{order.address.addressLine2}</p>
+                              <p>
+                                {order.address.city}, {order.address.state}{" "}
+                                {order.address.pincode}
+                              </p>
+                              <p>{order.address.country}</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-8">
                   <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No orders yet</p>
