@@ -109,66 +109,6 @@ export default function CartPage() {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-              {/* <CardContent>
-                <div className="flex items-center space-x-4">
-                  <div className="relative w-20 h-20 flex-shrink-0">
-                    <Image
-                      src={item.product.mainImage.url || "/placeholder.svg"}
-                      alt={item.product.name}
-                      fill
-                      className="object-cover rounded-md"
-                      sizes="80px"
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">
-                      {item.product.name}
-                    </h3>
-                    <p className="text-2xl font-bold text-primary">
-                      ${item.product.price.toFixed(2)}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={item.quantity <= 1 || isDecrementing}
-                      onClick={() =>
-                        handleDecrement(item.product._id, item.quantity)
-                      }
-                      aria-label="Decrease quantity"
-                      className="cursor-pointer"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-12 text-center font-medium">
-                      {item.quantity}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={
-                        item.quantity >= item.product.stock || isIncrementing
-                      }
-                      onClick={() =>
-                        handleIncrement(item.product._id, item.quantity)
-                      }
-                      aria-label="Increase quantity"
-                      className="cursor-pointer"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-
-                    <div>
-                      <p className="font-semibold text-lg">
-                        ${(item.product.price * item.quantity).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent> */}
               <CardContent>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
                   {/* Product Image */}
@@ -183,7 +123,7 @@ export default function CartPage() {
                   </div>
 
                   {/* Product Info and Controls */}
-                  <div className="flex flex-col flex-1 space-y-2 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center w-full">
+                  <div className="flex flex-col flex-1 ms-4 space-y-2 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center w-full">
                     {/* Product name & price */}
                     <div className="flex flex-col min-w-0 sm:max-w-xs">
                       <h3 className="font-semibold text-base sm:text-lg truncate">
