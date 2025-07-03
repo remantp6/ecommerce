@@ -11,7 +11,7 @@ type FailedRequest = {
 // Create an Axios instance with a base URL and default headers
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
+  //headers: { "Content-Type": "application/json" },
 });
 
 // Flag to track if a token refresh is in progress
