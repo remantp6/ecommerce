@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -5,10 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useUserStore } from "@/store/userStore";
 import { Shield, ShoppingBag, Truck } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
+  const { username } = useUserStore();
+  const isAuthenticated = !!username;
   return (
     <main className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
@@ -23,9 +28,11 @@ export default function Home() {
           <Button size="lg" asChild>
             <Link href="/products">Shop Now</Link>
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/auth/register">Get Started</Link>
-          </Button>
+          {!isAuthenticated && (
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/auth/register">Get Started</Link>
+            </Button>
+          )}
         </div>
       </div>
 
