@@ -72,7 +72,7 @@ export default function CartPage() {
           Looks like you haven&apos;t added any items to your cart yet.
         </p>
         <Link href="/products">
-          <Button>Continue Shopping</Button>
+          <Button className="cursor-pointer">Continue Shopping</Button>
         </Link>
       </div>
     );

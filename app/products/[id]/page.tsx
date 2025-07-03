@@ -16,7 +16,7 @@ import { toast } from "sonner";
 export default function ProductPage() {
   const router = useRouter();
   const { id } = useParams();
-  const { username } = useUserStore();
+  const { username, role } = useUserStore();
   const isAuthenticated = !!username;
   const {
     data: productData,
@@ -65,6 +65,10 @@ export default function ProductPage() {
   const product = productData.data;
 
   const handleAddToCart = () => {
+    if (isAuthenticated && role === "ADMIN") {
+      toast.error("You cannot add items to the cart as an admin");
+      return;
+    }
     if (!isAuthenticated) {
       toast.error("Please log in to add items to your cart");
       return;
